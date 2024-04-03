@@ -1,0 +1,27 @@
+- block:
+  - name: Install Redis
+    apt:
+      name: redis-server
+      state: present
+
+  - name: Configure Redis
+    template:
+      src: ../files/redis.conf
+      dest: /etc/redis/redis.conf
+
+  - name: Start Redis
+    service:
+      name: redis-server
+      state: started
+      enabled: true
+
+  - name: Enable Redis on system startup
+    systemd:
+      name: redis-server
+      enabled: true
+      masked: false
+
+  - name: Restart Redis
+    service:
+      name: redis-server
+      state: restarted

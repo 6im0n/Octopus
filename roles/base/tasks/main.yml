@@ -1,0 +1,21 @@
+- block:
+  - name: Update and upgrade apt packages
+    become: true
+    apt:
+      update_cache: true
+      upgrade: dist
+      autoremove: true
+      autoclean: true
+
+  - name: Install needed packages
+    become: true
+    apt:
+      name:
+        - git
+        - python3
+        - python3-pip
+        - python3-venv
+        - nodejs
+        - npm
+        - java-1.8.0-openjdk
+      state: present
