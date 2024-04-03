@@ -1,0 +1,50 @@
+name: Update README
+
+on:
+  push:
+    branches:
+      - main  # Adjust your branch name accordingly
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Necessary to count all commits and branches/tags
+
+    - name: Prepare stats
+      run: |
+        # Basic stats
+        total_commits=$(git rev-list --count HEAD)
+        num_branches=$(git branch --all | wc -l)
+        num_tags=$(git tag | wc -l)
+        latest_commit_message=$(git log -1 --pretty=%B)
+        latest_commit_date=$(git log -1 --format=%cd)
+        
+        # Commit counts by user
+        commit_counts=$(git shortlog -s -n --all | awk '{$1=""; sub(" ", "", $0); print "- " $0 ": " $1}' | tr '\n' ',')
+
+        # Format and export variables
+        commit_counts="${commit_counts%,}"  # Remove trailing comma
+        echo "TOTAL_COMMITS=$total_commits" >> $GITHUB_ENV
+        echo "NUM_BRANCHES=$num_branches" >> $GITHUB_ENV
+        echo "NUM_TAGS=$num_tags" >> $GITHUB_ENV
+        echo "LATEST_COMMIT_MESSAGE=$latest_commit_message" >> $GITHUB_ENV
+        echo "LATEST_COMMIT_DATE=$latest_commit_date" >> $GITHUB_ENV
+        echo "COMMIT_COUNTS=$commit_counts" >> $GITHUB_ENV
+
+    - name: Update README
+      run: |
+        new_content="\n## Project Stats\n\n- Total Commits: $TOTAL_COMMITS\n- Number of Branches: $NUM_BRANCHES\n- Number of Tags: $NUM_TAGS\n- Latest Commit Message: $LATEST_COMMIT_MESSAGE\n- Date of Latest Commit: $LATEST_COMMIT_DATE\n\n"
+    
+        git rm README.md
+        echo -e "$new_content" > README.md
+        echo "new content is :"
+        echo -e "$new_content"
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git add README.md
+        git commit -m ":bulb: Update README with latest stats" || echo ":monocle_face: No changes to commit"
+        git push

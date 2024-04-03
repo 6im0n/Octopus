@@ -1,0 +1,40 @@
+name: Chocolatine
+
+on:
+  push:
+    branches-ignore:
+      - 'ga-ignore-*'
+    
+  pull_request:
+      branches-ignore:
+          - 'ga-ignore-*'
+
+jobs:
+  check_commit_name: # job ok
+    name: Check commit name
+    runs-on: ubuntu-latest
+    steps:
+        - name: Check commit name
+          id: check_commit_name
+          uses: actions/checkout@v3
+        - name: Run Check commit name
+          run: |
+            COMMIT_NAME=$(git log --format=%s -n 1)
+            if [[ ! $COMMIT_NAME =~ ^:[a-z_]+: ]]; then
+              echo "::error title=Invalid commit name::Commit name must start with a gitmoji"
+              exit 1
+            fi
+  push_to_mirror:
+  name: push to mirror
+  needs: check_commit_name
+  runs-on: ubuntu-latest
+  steps:
+    - name: get mirror
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: push to mirror
+      uses: pixta-dev/repository-mirroring-action@v1
+      with:
+        target_repo_url: ${{ secrets.MIRROR_URL }}
+        ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
