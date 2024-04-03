@@ -1,3 +1,4 @@
+
 - name: Update packages
   apt: # use the apt module to manage packages
     update_cache : yes # run the equivalent of apt-get update for debian-based systems
@@ -14,4 +15,3 @@
   apt:
     name : git # install the git package
     state: present # ensure the package is installed
-

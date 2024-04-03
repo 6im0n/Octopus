@@ -1,0 +1,31 @@
+  - block:
+    - name: set apt key
+      become: true
+      apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+
+
+    - name: Ensure the database service is running
+      service:
+        name: postgresql
+        state: started
+        enabled: true
+      become: true
+
+    - name: Create database user
+      postgresql_user:
+        name: "{{ postgresql_database_user_username }}"
+        password: "{{ postgresql_database_user_password }}"
+        role_attr_flags: CREATEDB,LOGIN
+        state: present
+      become: true
+      become_user: postgres
+
+    - name: Create database
+      postgresql_db:
+        name: "{{ postgresql_database_name }}"
+        owner: "{{ postgresql_database_owner }}"
+        state: present
+      become: true
+      become_user: postgres
