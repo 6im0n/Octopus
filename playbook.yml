@@ -1,0 +1,35 @@
+- name: BaseConf
+  become: true # sudo
+  hosts: all # all hosts
+  roles:
+    - 'base'
+
+- name: RedisConf
+  become: true
+  hosts: 'redis'
+  roles:
+    - 'redis'
+
+- meta: PostgreSQLConf
+  become: true
+  hosts: 'postgresql'
+  roles:
+    - 'postgresql'
+
+- name: PollConf
+  become: true
+  hosts: 'poll'
+  roles:
+    - 'poll'
+
+- name: WorkerConf
+  become: true
+  hosts: 'worker'
+  roles:
+    - 'worker'
+
+- name: ResultConf
+  become: true
+  hosts: 'result'
+  roles:
+    - 'result'
