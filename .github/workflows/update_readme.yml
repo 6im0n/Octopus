@@ -3,7 +3,7 @@ name: Update README
 on:
   push:
     branches:
-      - main  # Adjust your branch name accordingly
+      - '*'
 
 jobs:
   update-readme:
@@ -38,8 +38,10 @@ jobs:
     - name: Update README
       run: |
         new_content="\n## Project Stats\n\n- Total Commits: $TOTAL_COMMITS\n- Number of Branches: $NUM_BRANCHES\n- Number of Tags: $NUM_TAGS\n- Latest Commit Message: $LATEST_COMMIT_MESSAGE\n- Date of Latest Commit: $LATEST_COMMIT_DATE\n\n"
-    
-        git rm README.md
+        
+        if [ -f README.md ]; then
+          git rm README.md
+        fi
         echo -e "$new_content" > README.md
         echo "new content is :"
         echo -e "$new_content"
