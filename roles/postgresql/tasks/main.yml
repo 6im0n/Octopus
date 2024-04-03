@@ -15,8 +15,8 @@
 
     - name: Create database user
       postgresql_user:
-        name: paul
-        password: democracyIsFragile
+        name: "{{ postgresql_database_user_username }}"
+        password: "{{ postgresql_database_user_password }}"
         role_attr_flags: CREATEDB,LOGIN
         state: present
       become: true
@@ -24,8 +24,8 @@
 
     - name: Create database
       postgresql_db:
-        name: paul
-        owner: paul
+        name: "{{ postgresql_database_name }}"
+        owner: "{{ postgresql_database_owner }}"
         state: present
       become: true
       become_user: postgres
