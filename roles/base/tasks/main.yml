@@ -1,0 +1,17 @@
+- name: Update packages
+  apt: # use the apt module to manage packages
+    update_cache : yes # run the equivalent of apt-get update for debian-based systems
+
+- name: Upgrade packages
+  apt:
+    upgrade: yes # run the equivalent of apt-get upgrade for debian-based systems
+
+- name: Remove unuseful packages
+  apt:
+    autoremove: yes # run the equivalent of apt-get autoremove for debian-based systems
+
+- name: Install git package
+  apt:
+    name : git # install the git package
+    state: present # ensure the package is installed
+
