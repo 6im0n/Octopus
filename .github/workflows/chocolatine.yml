@@ -20,6 +20,7 @@ jobs:
         - name: Run Check commit name
           run: |
             COMMIT_NAME=$(git log --format=%s -n 1)
+            echo "Commit name: $COMMIT_NAME"
             if [[ ! $COMMIT_NAME =~ ^:[a-z_]+: ]]; then
               echo "::error title=Invalid commit name::Commit name must start with a gitmoji"
               exit 1
