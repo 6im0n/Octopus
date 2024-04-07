@@ -1,0 +1,46 @@
+
+- name: Create directory for poll
+  become: true
+  file:
+    path: /home/poll/poll
+    state: directory
+
+- name: Archive poll
+  become: true
+  unarchive:
+    src: poll.tar
+    dest: /home/poll/
+
+- name: install virtualenv
+  become: true
+  apt:
+    name: virtualenv
+    state: present
+
+- name: Create virtualenv
+  become: true
+  pip :
+    virtualenv: /home/poll/venv
+    requirements: /home/poll/poll/requirements.txt
+
+- name: Install service
+  become: true
+  template:
+    src: ../poll/files/poll.service
+    dest: /etc/systemd/system/poll.service
+    mode: 0644
+    owner: root
+    group: root
+    force: yes
+
+- name: deamond reload service
+  become: true
+  systemd:
+    daemon_reload: true
+
+- name: Enable service
+  become: true
+  systemd:
+    name: poll.service
+    enabled: true
+    state: started

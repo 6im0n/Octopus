@@ -1,0 +1,12 @@
+[Unit]
+Description=a simple service for running the pool app
+After=network.target
+
+[Service]
+ExecStart=/home/poll/venv/bin/python3 /home/poll/poll/app.py
+WorkingDirectory=/home/poll/poll
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

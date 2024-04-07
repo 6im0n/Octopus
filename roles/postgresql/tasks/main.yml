@@ -1,31 +1,76 @@
-  - block:
-    - name: set apt key
-      become: true
-      apt_key:
-        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-        state: present
 
+- name: Add pgdg repo to sources.list.d
+  lineinfile:
+    path: /etc/apt/sources.list.d/pgdg.list
+    line: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    create: true
 
-    - name: Ensure the database service is running
-      service:
-        name: postgresql
-        state: started
-        enabled: true
-      become: true
+- name: Import the PostgreSQL public GPG key
+  become: true
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
 
-    - name: Create database user
-      postgresql_user:
-        name: "{{ postgresql_database_user_username }}"
-        password: "{{ postgresql_database_user_password }}"
-        role_attr_flags: CREATEDB,LOGIN
-        state: present
-      become: true
-      become_user: postgres
+- name: Update the package list
+  become: true
+  apt:
+    update_cache: yes
 
-    - name: Create database
-      postgresql_db:
-        name: "{{ postgresql_database_name }}"
-        owner: "{{ postgresql_database_owner }}"
-        state: present
-      become: true
-      become_user: postgres
+- name: Install PostgreSQL et tools
+  become: true
+  apt:
+    name:
+      - postgresql-16
+      - postgresql-client-16
+      - python3-psycopg2
+    state: present
+
+- name: Configure PostgreSQL
+  copy:
+    src: ../files/pg_hba.conf
+    dest: /etc/postgresql/16/main/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: 0644
+
+- name: Configure PostgreSQL
+  copy:
+    src: ../files/postgresql.conf
+    dest: /etc/postgresql/16/main/postgresql.conf
+    owner: postgres
+    group: postgres
+    mode: 0644
+
+- name: 'Upload schema.sql'
+  copy:
+    src: '../files/schema.sql'
+    dest: '/etc/postgresql/16/main/schema.sql'
+    owner: 'postgres'
+    group: 'postgres'
+    mode: '0644'
+
+- name: Restart Postgresql
+  systemd:
+    enabled: yes
+    name: postgresql@16-main.service
+    state: restarted
+
+- name: Create a PostgreSQL database
+  become: true
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_database_name }}"
+
+- name: Create a PostgreSQL user
+  become: true
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_database_user_username }}"
+    password: "{{ postgresql_database_user_password }}"
+    encrypted: yes
+    state: present
+
+- name: apply schema.sql
+  become: true
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_database_name }}"
+    state: present
+    target: '/etc/postgresql/16/main/schema.sql'
