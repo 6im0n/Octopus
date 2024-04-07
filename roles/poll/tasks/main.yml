@@ -1,45 +1,46 @@
-- name: 'Create user'
-  user:
-    name: 'poll'
-    state: 'present'
 
-- name: 'Create directory for poll'
+- name: Create directory for poll
+  become: true
   file:
-    path: '/var/www/poll'
-    state: 'directory'
+    path: /home/poll/poll
+    state: directory
 
-- name: 'Archive poll'
+- name: Archive poll
+  become: true
   unarchive:
-    src: 'poll.tar'
-    dest: '/var/www/poll'
-    extra_opts: '--strip-components=1'
+    src: poll.tar
+    dest: /home/poll/
 
-- name: 'Build project with --break-system-packages'
-  pip:
-    requirements: '/var/www/poll/requirements.txt'
-    extra_args: '--no-deps --break-system-packages'
+- name: install virtualenv
+  become: true
+  apt:
+    name: virtualenv
+    state: present
 
-- name: 'Install service'
-  copy:
-    src: 'poll.service'
-    dest: '/etc/systemd/system/poll.service'
-    mode: '0644'
-    owner: 'poll'
+- name: Create virtualenv
+  become: true
+  pip :
+    virtualenv: /home/poll/venv
+    requirements: /home/poll/poll/requirements.txt
 
-- name: 'Unmask service'
-  shell: "sudo systemctl unmask poll.service"
+- name: Install service
+  become: true
+  template:
+    src: ../poll/files/poll.service
+    dest: /etc/systemd/system/poll.service
+    mode: 0644
+    owner: root
+    group: root
+    force: yes
 
-- name: 'deamond reload service'
+- name: deamond reload service
+  become: true
   systemd:
     daemon_reload: true
 
-- name: 'Enable service'
+- name: Enable service
+  become: true
   systemd:
-    name: 'poll.service'
+    name: poll.service
     enabled: true
-    state: 'restarted'
-
-- name: 'Start Poll'
-  service:
-    name: 'poll.service'
-    state: 'started'
+    state: started

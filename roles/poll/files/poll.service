@@ -3,9 +3,8 @@ Description=a simple service for running the pool app
 After=network.target
 
 [Service]
-Environment="FLASK_APP=/var/www/poll/app.py"
-WorkingDirectory=/var/www/poll
-ExecStart=/usr/bin/python3 -m flask run --host=0.0.0.0 --port=80
+ExecStart=/home/poll/venv/bin/python3 /home/poll/poll/app.py
+WorkingDirectory=/home/poll/poll
 Restart=always
 RestartSec=3
 
