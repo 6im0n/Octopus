@@ -6,18 +6,15 @@
     create: true
 
 - name: Import the PostgreSQL public GPG key
-  become: true
   apt_key:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     state: present
 
 - name: Update the package list
-  become: true
   apt:
     update_cache: yes
 
 - name: Install PostgreSQL et tools
-  become: true
   apt:
     name:
       - postgresql-16
@@ -26,7 +23,7 @@
     state: present
 
 - name: Configure PostgreSQL
-  copy:
+  template:
     src: ../files/pg_hba.conf
     dest: /etc/postgresql/16/main/pg_hba.conf
     owner: postgres
@@ -34,43 +31,68 @@
     mode: 0644
 
 - name: Configure PostgreSQL
-  copy:
+  template:
     src: ../files/postgresql.conf
     dest: /etc/postgresql/16/main/postgresql.conf
     owner: postgres
     group: postgres
     mode: 0644
 
-- name: 'Upload schema.sql'
-  copy:
-    src: '../files/schema.sql'
-    dest: '/etc/postgresql/16/main/schema.sql'
-    owner: 'postgres'
-    group: 'postgres'
-    mode: '0644'
+- name: Upload schema.sql
+  template:
+    src: ../files/schema.sql
+    dest: /etc/postgresql/16/main/schema.sql
+    mode: 0644
 
 - name: Restart Postgresql
   systemd:
     enabled: yes
     name: postgresql@16-main.service
     state: restarted
-
-- name: Create a PostgreSQL database
-  become: true
-  community.postgresql.postgresql_db:
-    name: "{{ postgresql_database_name }}"
+  changed_when: false
 
 - name: Create a PostgreSQL user
-  become: true
   community.postgresql.postgresql_user:
     name: "{{ postgresql_database_user_username }}"
     password: "{{ postgresql_database_user_password }}"
     encrypted: yes
     state: present
 
-- name: apply schema.sql
-  become: true
+- name: Create a PostgreSQL database
   community.postgresql.postgresql_db:
     name: "{{ postgresql_database_name }}"
-    state: present
-    target: '/etc/postgresql/16/main/schema.sql'
+
+- name: Grant all privileges on public schema to paul
+  postgresql_privs:
+    privs: ALL
+    type: schema
+    objs: public
+    roles: "{{ postgresql_database_user_username }}"
+    db: "{{ postgresql_database_name }}"
+
+# - name: Create votes table
+#   postgresql_query:
+#     query: |
+#       CREATE TABLE IF NOT EXISTS votes (
+#         id TEXT PRIMARY KEY,
+#         vote TEXT NOT NULL
+#       );
+#     db: "{{ postgresql_database_name }}"
+
+- name: "Ensure database scheme"
+  community.postgresql.postgresql_script:
+    login_user: "{{ postgresql_database_user_username }}"
+    login_password: "{{ postgresql_database_user_password }}"
+    login_host: "127.0.0.1"
+    db: "{{ postgresql_database_name }}"
+    path: /etc/postgresql/16/main/schema.sql
+  changed_when: false
+
+- name: Grant all privileges on votes table to paul
+  postgresql_privs:
+    privs: ALL
+    type: table
+    objs: votes
+    roles: "{{ postgresql_database_user_username }}"
+    db: "{{ postgresql_database_name }}"
+

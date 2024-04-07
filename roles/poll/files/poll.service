@@ -3,6 +3,7 @@ Description=a simple service for running the pool app
 After=network.target
 
 [Service]
+Environment='REDIS_HOST={{ hostvars['redis'].ansible_host }}'
 ExecStart=/home/poll/venv/bin/python3 /home/poll/poll/app.py
 WorkingDirectory=/home/poll/poll
 Restart=always

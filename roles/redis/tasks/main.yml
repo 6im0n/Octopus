@@ -1,17 +1,19 @@
-- name: 'Install Redis'
+- name: Install Redis
   apt:
-    name: 'redis-server'
-    state: 'present'
+    name: redis-server
+    state: present
 
-- name: 'Configure redis.conf'
+- name: Configure redis.conf
   copy:
-    src: 'redis.conf'
-    dest: '/etc/redis/redis.conf'
-    owner: 'redis'
-    group: 'redis'
-    mode: '0644'
+    src: redis.conf
+    dest: /etc/redis/redis.conf
+    owner: redis
+    group: redis
+    mode: 0644
 
-- name: 'Restart Redis'
+- name: Restart Redis
   systemd:
-    name: 'redis-server'
-    state: 'restarted'
+    name: redis-server
+    state: restarted
+    enabled: yes
+  changed_when: false

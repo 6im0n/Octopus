@@ -1,0 +1,40 @@
+- name: Create directory for result
+  file:
+    path: /var/www/result
+    state: directory
+
+- name : upload the result app
+  unarchive:
+    src: result.tar
+    dest: /var/www/result
+    extra_opts: --strip-components=1
+
+- name: install the nodejs and npm
+  apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+
+- name: Run npm install to install the dependencies # equivalent of the npm install cmd
+  npm:
+    path: /var/www/result
+    name: ""
+
+- name: Install service
+  template:
+    src: ../result/files/result.service
+    dest: /etc/systemd/system/result.service
+    mode: 0644
+    owner: root
+    group: root
+
+- name: deamond reload service
+  systemd:
+    daemon_reload: true
+
+- name: Enable service
+  systemd:
+    name: result.service
+    enabled: true
+    state: started

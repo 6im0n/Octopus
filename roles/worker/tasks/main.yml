@@ -1,0 +1,56 @@
+- name: create the directory for the worker
+  file:
+    path: /home/worker
+    state: directory
+    mode: 0755
+
+- name: Download the java JDK tarball
+  get_url:
+    url: https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.deb
+    dest: /home/worker/jdk-21_linux-x64_bin.deb
+
+- name: Install Java JDK on Debian-based systems
+  apt:
+    deb: /home/worker/jdk-21_linux-x64_bin.deb
+    state: present
+
+- name: Extract worker.tar to /home/worker
+  unarchive:
+    src: worker.tar
+    dest: /home/
+
+- name: Install Java JDK on Debian-based systems and Maven
+  apt:
+    name:
+      - maven
+    state: present
+
+# - name: Run Maven install
+#
+#   mvn:
+#     goals: install
+#     path: /home/worker/
+
+- name: Build Maven project using shell
+  command: mvn dependency:resolve package
+  args:
+    chdir: /home/worker/
+  changed_when: false
+
+- name: Upload the worker service
+  template:
+    src: ../worker/files/worker.service
+    dest: /etc/systemd/system/worker.service
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Reload systemd deamon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable the worker service
+  systemd:
+    name: worker.service
+    enabled: yes
+    state: started

@@ -1,0 +1,18 @@
+[Unit]
+Description= a simple service for runnin the worker app
+After=network.target
+
+[Service]
+Type=simple
+Environment='REDIS_HOST={{ hostvars['redis'].ansible_host }}'
+Environment='POSTGRES_HOST={{ hostvars['postgresql'].ansible_host }}'
+Environment='POSTGRES_PORT={{ postgresql_database_port }}'
+Environment='POSTGRES_USER={{ postgresql_database_user_username }}'
+Environment='POSTGRES_PASSWORD={{ postgresql_database_user_password }}'
+Environment='POSTGRES_DB={{ postgresql_database_name }}'
+WorkingDirectory=/home/worker
+ExecStart=java -jar ./target/worker-jar-with-dependencies.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,17 +1,43 @@
 
-- name: Update packages
-  apt: # use the apt module to manage packages
-    update_cache : yes # run the equivalent of apt-get update for debian-based systems
+  - name: Update packages
+    apt: # use the apt module to manage packages
+      update_cache : yes # run the equivalent of apt-get update for debian-based systems
 
-- name: Upgrade packages
-  apt:
-    upgrade: yes # run the equivalent of apt-get upgrade for debian-based systems
+  - name: Upgrade packages
+    apt:
+      upgrade: yes # run the equivalent of apt-get upgrade for debian-based systems
 
-- name: Remove unuseful packages
-  apt:
-    autoremove: yes # run the equivalent of apt-get autoremove for debian-based systems
+  - name: Remove unuseful packages
+    apt:
+      autoremove: yes # run the equivalent of apt-get autoremove for debian-based systems
 
-- name: Install git package
-  apt:
-    name : git # install the git package
-    state: present # ensure the package is installed
+  - name: Install base packages
+    apt:
+      name :
+        - git
+        - curl
+        - ca-certificates
+        - unzip
+      state: present # ensure the package is installed
+
+  - name: Install Python 3 /tools
+    apt:
+      name:
+        - python3
+        - python3-pip
+        - python3-setuptools
+      state: present
+
+  - name: Install zsh package
+    apt:
+      name : zsh
+      state: present
+
+  - name: set zsh as the root shell.
+    user:
+      name: root
+      shell: /bin/zsh
+
+  - name: set the timezone to europe/paris
+    timezone:
+      name: Europe/Paris

@@ -10,7 +10,7 @@
   roles:
     - 'redis'
 
-- meta: PostgreSQLConf
+- name: PostgreSQLConf
   become: true
   hosts: 'postgresql'
   roles:
