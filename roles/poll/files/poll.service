@@ -1,0 +1,13 @@
+[Unit]
+Description=Flask Application
+After=network.target
+
+[Service]
+Environment="FLASK_APP=/var/www/poll/app.py"
+WorkingDirectory=/var/www/poll
+ExecStart=/usr/bin/python3 -m flask run --host=0.0.0.0 --port=80
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

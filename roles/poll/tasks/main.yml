@@ -1,0 +1,45 @@
+- name: 'Create user'
+  user:
+    name: 'poll'
+    state: 'present'
+
+- name: 'Create directory for poll'
+  file:
+    path: '/var/www/poll'
+    state: 'directory'
+
+- name: 'Archive poll'
+  unarchive:
+    src: 'poll.tar'
+    dest: '/var/www/poll'
+    extra_opts: '--strip-components=1'
+
+- name: 'Build project with --break-system-packages'
+  pip:
+    requirements: '/var/www/poll/requirements.txt'
+    extra_args: '--no-deps --break-system-packages'
+
+- name: 'Install service'
+  copy:
+    src: 'poll.service'
+    dest: '/etc/systemd/system/poll.service'
+    mode: '0644'
+    owner: 'poll'
+
+- name: 'Unmask service'
+  shell: "sudo systemctl unmask poll.service"
+
+- name: 'deamond reload service'
+  systemd:
+    daemon_reload: true
+
+- name: 'Enable service'
+  systemd:
+    name: 'poll.service'
+    enabled: true
+    state: 'restarted'
+
+- name: 'Start Poll'
+  service:
+    name: 'poll.service'
+    state: 'started'
