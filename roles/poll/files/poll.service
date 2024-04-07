@@ -1,5 +1,5 @@
 [Unit]
-Description=Flask Application
+Description=a simple service for running the pool app
 After=network.target
 
 [Service]
