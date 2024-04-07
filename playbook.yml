@@ -10,17 +10,17 @@
   roles:
     - 'redis'
 
-- meta: PostgreSQLConf
-  become: true
-  hosts: 'postgresql'
-  roles:
-    - 'postgresql'
-
 - name: PollConf
   become: true
   hosts: 'poll'
   roles:
     - 'poll'
+
+- name: PostgreSQLConf
+  become: true
+  hosts: 'postgresql'
+  roles:
+    - 'postgresql'
 
 - name: WorkerConf
   become: true

@@ -1,0 +1,17 @@
+[Unit]
+Description= a simple service for runnin the result app
+After=network.target
+
+[Service]
+Type=simple
+Environment='POSTGRESQL_USER={{ postgresql_database_user_username }}'
+Environment='POSTGRESQL_PASSWORD={{ postgresql_database_user_password }}'
+Environment='POSTGRESQL_HOST={{ hostvars['postgresql'].ansible_host }}'
+Environment='POSTGRESQL_PORT={{ postgresql_database_port }}'
+Environment='POSTGRESQL_DB={{ postgresql_database_name }}'
+WorkingDirectory=/var/www/result
+ExecStart=node server.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
